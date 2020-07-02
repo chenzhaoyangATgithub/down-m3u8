@@ -1,0 +1,26 @@
+#!/bin/bash
+(
+cur_path=$(cd "$(dirname $(ls -ld $0|awk '{print $NF}'))";pwd)
+echo $cur_path
+if [ -z "$2" ]; then
+	    echo "file name is in need"
+	    exit
+fi
+
+    
+mkdir -p $2
+cd $2
+base=`pwd`
+open $base
+cd -
+source ${cur_path}/env/bin/activate &&
+cd ${cur_path} &&
+python m3u8.py $1 $base &&
+cd $base
+fname=`pwd| awk -F '/' '{print $(NF)}'` 
+ffmpeg -f concat -i index.list -c copy ${fname}.mp4 && rm -rf *.ts && rm -rf index.list &&
+mv *.mp4 ../ &&
+cd .. &&
+rm -rf $base &&
+open ${fname}.mp4
+)
